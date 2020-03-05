@@ -1,5 +1,5 @@
 classdef NJM < handle
-	%NJM Negyedjármûmodell
+	%NJM Negyedjármûmodell SZI
 	
 	properties
 		
