@@ -133,6 +133,11 @@ classdef NJM < handle
 			
 			% Példányosítás
 			njm = NJM(u, x_0);
+			njm.T_0 = 3;
+			
+			% Szimuláció és megjelenítés
+			njm.Simulate();
+			njm.Plot();
 			
 		end
 		
