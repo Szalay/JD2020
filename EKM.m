@@ -8,7 +8,7 @@ classdef EKM
 		
 		% Kerék
 		R = 0.35;			% [m]
-		J = 1.5;			% [kg m^2]
+		J = 1.5;			% [kg m^2] = [Nm/(rad/s^2)]
 		B = 1;				% [Nm/(rad/s)]
 		
 		% Légellenállás
@@ -16,6 +16,21 @@ classdef EKM
 		rho = 1.2;			% [kg/m^3]
 		A = 2;				% [m^2]
 		
+		% Fékrendszer
+		pV0 = 762;			% [kPa]
+		pV1 = 2;
+		pV2 = 1.41;
+		pV3 = 0.097;
+		
+		V_0 = 0.59;			% [cm^3], haszontalan térfogat
+		T_D = 10e-3;		% [s], fékholtidõ
+		C_q = 1.4;			% [cm^3/(s*sqrt(kPa))]
+		
+		A_F = 4e-4;			% [m^2], fékmunkahenger keresztmetszete
+		mu_F = 1;			% A súrlódási együttható a tárcsa és a pofák között
+		R_F = 0.2;			% [m]
+		
+		p_0 = 20000;		% [kPa]
 	end
 	
 	methods (Static)
@@ -45,6 +60,16 @@ classdef EKM
 				else
 					m_f = -sign(M) * M;
 				end
+			end
+		end
+		
+		function p = BrakeModel(V)
+			if V > EKM.V_0
+				p = EKM.pV0 * (V - EKM.pV1 * (1 - exp( ...
+					-(V - EKM.pV3)/EKM.pV2 ...
+					)));
+			else
+				p = 0;
 			end
 		end
 		
