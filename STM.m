@@ -2,7 +2,8 @@ classdef STM < handle
 	%STM 
 	
 	properties
-		V;
+		Vehicle;			% Jármû (Vehicle)
+		Track;				% Pálya (Track)
 		
 		T_0;		% A szimuláció hossza
 		T_S;		% Mintavételi idõ
@@ -15,8 +16,10 @@ classdef STM < handle
 	
 	methods
 		
-		function this = STM(vehicle, t_S, t_0, x_0)
-			this.V = vehicle;
+		function this = STM(vehicle, track, t_S, t_0, x_0)
+			this.Vehicle = vehicle;
+			this.Track = track;
+			this.Vehicle.Driver.Follow(this.Track);
 			
 			this.T_S = t_S;
 			this.T_0 = t_0;
@@ -25,7 +28,7 @@ classdef STM < handle
 		end
 		
 		function Simulate(this)
-			[this.T, this.X] = ode45(@(t, x)this.V.Model(t, x), 0:this.T_S:this.T_0, this.x_0);
+			[this.T, this.X] = ode45(@(t, x)this.Vehicle.Model(t, x), 0:this.T_S:this.T_0, this.x_0);
 		end
 		
 		function Plot(this)
@@ -34,7 +37,8 @@ classdef STM < handle
 			subplot(4, 4, [1, 15]);
 			hold on;
 			axis equal;
-			title('Pálya');
+			title('Pálya és nyomvonal');
+			plot(this.Track.X, this.Track.Y, 'Color', [0.5, 0.5, 0.5], 'LineWidth', 10);
 			plot(this.X(:, 5), this.X(:, 6), 'k-', 'LineWidth', 3);
 			
 			subplot(4, 4, 4);
@@ -53,16 +57,20 @@ classdef STM < handle
 			plot(this.T, this.X(:, 4));
 			
 			% Nem állapotváltozók
-			delta = this.V.D.SteeringAngle(this.T, this.X);
-			[alfa_1, alfa_2] = this.V.SideSlip( ...
+			[delta, index] = this.Vehicle.Driver.SteeringAngle(this.T, this.X);
+			[alfa_1, alfa_2] = this.Vehicle.SideSlip( ...
 				this.X(:, 1), this.X(:, 2), this.X(:, 3), this.X(:, 4), delta ...
 				);
 			
 			subplot(4, 4, 16);
 			hold on;
 			title('A kormányszög és a kúszási szögek');
-			plot(this.T, delta, 'LineWidth', 3);
-			plot(this.T, [alfa_1, alfa_2]);
+			pd = plot(this.T, delta, 'Color', [0, 0.5, 0], 'LineWidth', 3);
+			plot(this.T, index/max(index), 'm-', 'LineWidth', 3);
+			pa1 = plot(this.T, alfa_1, 'b--', 'LineWidth', 2);
+			pa2 = plot(this.T, alfa_2, 'r--', 'LineWidth', 2);
+			
+			legend([pd, pa1, pa2], {'\delta', '\alpha_1', '\alpha_2'});
 		end
 		
 	end
@@ -70,7 +78,10 @@ classdef STM < handle
 	methods (Static)
 		
 		function stm = Run()
-			stm = STM(Vehicle.BMW3, 1e-3, 10, ...
+			x_0 = 10;
+			y_0 = 25;
+			
+			stm = STM(Vehicle.BMW3, Track.Circle(x_0, y_0 + 200, 200, 10, 270, 360), 1e-3, 30, ...
 				[10; 10; 0; 45/180*pi; 10; 25] ...
 				);
 			

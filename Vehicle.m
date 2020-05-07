@@ -2,7 +2,7 @@ classdef Vehicle < handle
 	%VEHICLE 
 	
 	properties
-		D = Driver();
+		Driver = Driver();
 		
 		% Össztömeg
 		m;						% [kg]
@@ -62,7 +62,7 @@ classdef Vehicle < handle
 			% Bemenetek
 			
 			% Kormányszög
-			delta = this.D.SteeringAngle(t, x);
+			delta = this.Driver.SteeringAngle(t, x);
 			
 			% Hajtóerõ
 			F_H = 0;
